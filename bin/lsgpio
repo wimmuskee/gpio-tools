@@ -1,0 +1,8 @@
+#!/bin/sh
+# Simple wrapper for kernel gpio output.
+
+if [ -f /sys/kernel/debug/gpio ]; then
+	cat /sys/kernel/debug/gpio
+else
+	echo "No GPIO's accessible"
+fi

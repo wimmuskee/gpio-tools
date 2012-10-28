@@ -1,0 +1,17 @@
+# signal to pin mappings for Beaglebone rev A6
+
+gpmc_a5=usrled-0
+gpmc_a6=usrled-1
+gpmc_a7=usrled-2
+gpmc_a8=usrled-3
+gpmc_ad2=P8-5
+gpmc_ad6=P8-3
+gpmc_ad7=P8-4
+gpmc_ad10=P8-14
+gpmc_ad12=P8-12
+gpmc_ad13=P8-11
+gpmc_advn_ale=P8-7
+gpmc_ben1=P9-12
+gpmc_csn0=P8-26
+gpmc_wpn=P9-13
+mcasp0_fsr=P9-27

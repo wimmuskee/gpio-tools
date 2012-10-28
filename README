@@ -1,0 +1,7 @@
+This Bash library contains functions to control a GPIO and the signals of the Beaglebone. Other board libraries and 
+signal-to-pin mappings can be integrated easily.
+
+Installation:
+ - git clone git://github.com/wimmuskee/gpio-tools.git
+ - cp -r gpio-tools /usr/share/.
+ - cp gpio-tools/bin/* /usr/bin/.
