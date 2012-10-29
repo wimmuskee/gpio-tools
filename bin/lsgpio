@@ -1,6 +1,36 @@
 #!/bin/sh
-# Simple wrapper for kernel gpio output.
 
+function usage {
+cat << EOF
+usage: lsgpio <?option>
+
+OPTIONS:
+   -a   Exports current signal settings as csv file (when available).
+   -h   Displays this help.
+EOF
+}
+
+# Detects the board architecture and exports 
+# all signals as csv file.
+function detect_and_output {
+	if [ -d /sys/kernel/debug/omap_mux ]; then
+		source /usr/share/gpio-tools/boards/beaglebone.sh
+		exportSignals && exit 0
+	fi
+
+	echo "Your board architecture is currently not supported"
+	exit 0
+}
+
+while getopts "ah" OPTION
+do
+	case $OPTION in
+		"a") detect_and_output ;;
+		"h") usage && exit 0 ;;
+	esac
+done
+
+# Without options a simple wrapper for kernel gpio output.
 if [ -f /sys/kernel/debug/gpio ]; then
 	cat /sys/kernel/debug/gpio
 else

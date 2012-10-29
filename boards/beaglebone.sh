@@ -68,7 +68,7 @@ function calculateGPIO {
 # pin number when it is defined in the
 # mappings.
 function exportSignals {
-	echo -e "pin;mode;bit;mode0;mode1;mode2;mode3;mode4;mode5;mode6;mode7"
+	echo -e "pin;mode;bits;mode0;mode1;mode2;mode3;mode4;mode5;mode6;mode7"
 
 	for s in $(find /sys/kernel/debug/omap_mux -type f); do
 		pin=""
@@ -90,7 +90,7 @@ function exportSignals {
 				"name")
 					name=$(echo ${line} | cut -d ' ' -f 2)
 					mode=$(echo ${name} | cut -d '.' -f 2)
-					bitmask=$(echo ${line} | cut -d ' ' -f 5 | tr -d ')')
+					bits=$(echo ${line} | cut -d ' ' -f 5 | tr -d '),')
 					;;
 				"signals")
 					mode1=$(echo ${line} | cut -d '|' -f 2 | tr -d ' ')
@@ -106,7 +106,7 @@ function exportSignals {
 
 		IFS=$O
 
-		echo "$pin;$mode;$bitmask;$mode0;$mode1;$mode2;$mode3;$mode4;$mode5;$mode6;$mode7"
+		echo "$pin;$mode;$bits;$mode0;$mode1;$mode2;$mode3;$mode4;$mode5;$mode6;$mode7"
 	done
 }
 
