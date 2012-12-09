@@ -59,7 +59,7 @@ function calculateGPIO {
 
 		echo $(((major*32)+minor))
 	else
-		error "signal is not a gpio"
+		error "signal is not a gpio: ${mode0}"
 	fi
 }
 

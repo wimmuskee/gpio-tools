@@ -57,7 +57,7 @@ function readGPIO {
 	fi
 
 	if [ ! -f "/sys/class/gpio/gpio${gpio}/value" ]; then
-		err_msg "GPIO not found: ${gpio}"
+		error "GPIO not found: ${gpio}"
 	fi
 
 	cat "/sys/class/gpio/gpio${gpio}/value"
@@ -69,7 +69,7 @@ function writeGPIO {
 	local value=$2
 
 	if [ -z ${gpio} ] || [ -z ${value} ]; then
-		err_missing_parameters $FUNCNAME
+		error "missing parameters" $FUNCNAME
 	fi
 
 	if [ "${value}" != "0" ] && [ "${value}" != "1" ]; then
