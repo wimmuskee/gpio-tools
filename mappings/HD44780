@@ -1,0 +1,19 @@
+# character mappings for a HD44780 LCD display
+
+# 0-9 characters
+c=48
+for l in $(echo "01234567890" | fold -w1); do
+    binary=00$(echo "obase=2;$c" | bc)
+    eval "hd44780_${l}=\$binary"
+	c=$(( $c + 1 ))
+done
+
+# a-z characters
+c=65
+for l in $(echo "ABCDEFGHIJKLMNOPQRSTUVWXYZ" | fold -w1); do
+    binary=0$(echo "obase=2;$c" | bc)
+    eval "hd44780_${l}=\$binary"
+	c=$(( $c + 1 ))
+done
+
+hd44780_space=00100000
