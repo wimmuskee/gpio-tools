@@ -1,4 +1,13 @@
 # character mappings for a HD44780 LCD display
+# all characters are available under hd44780_$var
+
+# commands
+hd44780_clear=00000001
+hd44780_home=00000011
+hd44780_power=00001111
+hd44780_shiftright=00011000
+hd44780_shiftleft=00011100
+
 
 # 0-9 characters
 c=48

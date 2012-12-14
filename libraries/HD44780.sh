@@ -30,6 +30,23 @@ function setupHD44780 {
 	setupGPIO ${gpio_data_5} out
 	setupGPIO ${gpio_data_6} out
 	setupGPIO ${gpio_data_7} out
+
+    writeCommandHD44780 power
+    functionHD44780
+    writeCommandHD44780 clear
+}
+
+# Sets all output signals to zero
+# and re-initialize.
+function resetHD44780 {
+    writeCommandHD44780 00000000
+    writeDataHD44780 00000000
+    writeGPIO ${gpio_enable} 0
+    writeGPIO ${gpio_register} 0
+
+    writeCommandHD44780 power
+    functionHD44780
+    writeCommandHD44780 clear
 }
 
 # Parses a string to separate characters,
@@ -52,26 +69,67 @@ function writeStringHD44780 {
 	unset IFS
 }
 
-# Writes the selected binary with the
-# register in command mode. Some
-# predefined commands are also available.
-function writeCommandHD44780 {
-	local value=${1}
+# Sets the position of the cursor. For
+# the HD44780, 80 positions can be selected.
+# Select 40 to start on the second line.
+function setCursorHD44780 {
+    local pos=$1
 	local binary
 
-	case ${value} in
-		"clear") binary=00000001 ;;
-		"home") binary=00000011 ;;
-		"power") binary=00001111 ;;
-		*) binary=${value}
-	esac
+    if [[ $pos -lt 0 ]] || [[ $pos -gt 79 ]]; then
+        error "Character position should be between 0 and 79"
+    fi
+
+    binary=$(echo "obase=2;$pos" | bc)
+    zeros_to_add=$(( 7 - ${#binary}))
+
+    local c=0
+    while [ $c -lt $zeros_to_add ]; do
+        binary="0"$binary
+        c=$(($c + 1))
+    done
+
+    writeCommandHD44780 "1"$binary
+}
+
+# Does a function command call depending on the
+# variables for this call. When one of the arguments
+# isn't present, set all to 1.
+function functionHD44780 {
+	local bits=$1
+	local lines=$2
+	local size=$3
+
+	if [ -z $bits ] || [ -z $lines ] || [ -z $size ]; then
+		# writing default if one of the args isn't there
+		writeCommandHD44780 00111100
+	else
+		writeCommandHD44780 001${bits}${lines}${size}00
+	fi
+}
+
+# Writes the selected binary with the register
+# in command mode. Some predefined commands are
+# also available in the mapping.
+function writeCommandHD44780 {
+	local value=${1}
+	local var
+	local binary
+
+	eval var=\$hd44780_$value
+
+	if [ ! -z $var ]; then
+		binary=$var
+	else
+		binary=$value
+	fi
 
 	writeGPIO ${gpio_enable} 1
 	writeGPIO ${gpio_register} 0
 	setDataHD44780 ${binary}
 	writeGPIO ${gpio_enable} 0
 	writeGPIO ${gpio_enable} 1
-
+	sleep 0.01
 }
 
 # Writes the selected binary with the
