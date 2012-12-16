@@ -15,8 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-source /usr/share/gpio-tools/mappings/HD44780
-
 # Set all required GPIO's to output
 # direction
 function setupHD44780 {
@@ -31,7 +29,7 @@ function setupHD44780 {
 	setupGPIO ${gpio_data_6} out
 	setupGPIO ${gpio_data_7} out
 
-    writeCommandHD44780 power
+    powerHD44780 1
     functionHD44780
     writeCommandHD44780 clear
 }
@@ -44,7 +42,7 @@ function resetHD44780 {
     writeGPIO ${gpio_enable} 0
     writeGPIO ${gpio_register} 0
 
-    writeCommandHD44780 power
+    powerHD44780 1
     functionHD44780
     writeCommandHD44780 clear
 }
@@ -54,17 +52,18 @@ function resetHD44780 {
 # binary values, and write the data.
 function writeStringHD44780 {
 	local string=${1}
-	local var
+	local binary
 	IFS=$(echo -en "\n\b")
 
 	for l in $(echo ${string} | tr '[:lower:]' '[:upper:]' | fold -w1); do
-		if [ "${l}" == " " ]; then
-			var=${hd44780_space}
-		elif [ $(echo "${l}" | grep -i "[a-z0-9]") ]; then
-			eval "var=\${hd44780_$l}"
-		fi
+		binary=$(grep "^${l}," mapping.csv | cut -d ',' -f 2)
 
-		writeDataHD44780 ${var}
+		if [ -z $binary ]; then
+			# default space
+			binary=00100000
+		fi
+	
+		writeDataHD44780 $binary
 	done
 	unset IFS
 }
@@ -92,13 +91,33 @@ function setCursorHD44780 {
     writeCommandHD44780 "1"$binary
 }
 
+# Does a power command call depending on the
+# variables for this call. When one of the cursor
+# arguments # isn't present, set them to 0.
+function powerHD44780 {
+	local power=$1			# 0=off, 1=on
+	local cursor=$2			# 0=off, 1=on
+	local cursorblink=$3	# 0=off, 1=on
+
+	if [ -z $power ]; then
+		error "missing parameters" $FUNCNAME
+	fi
+
+	if [ -z $cursor ] || [ -z $cursorblink ]; then
+		# writing default if one of the args isn't there
+		writeCommandHD44780 00001${power}00
+	else
+		writeCommandHD44780 00001${power}${cursor}${cursorblink}
+	fi
+}
+
 # Does a function command call depending on the
 # variables for this call. When one of the arguments
 # isn't present, set all to 1.
 function functionHD44780 {
-	local bits=$1
-	local lines=$2
-	local size=$3
+	local bits=$1	# 0=4, 1=8
+	local lines=$2	# 0=8, 1=16
+	local size=$3	# 0=5x8, 1=5x10
 
 	if [ -z $bits ] || [ -z $lines ] || [ -z $size ]; then
 		# writing default if one of the args isn't there
@@ -113,17 +132,12 @@ function functionHD44780 {
 # also available in the mapping.
 function writeCommandHD44780 {
 	local value=${1}
-	local var
-	local binary
+	local binary=$(grep "^${value}," /usr/share/gpio-tools/mappings/HD44780.csv | cut -d ',' -f 2)
 
-	eval var=\$hd44780_$value
-
-	if [ ! -z $var ]; then
-		binary=$var
-	else
+	if [ -z $binary ]; then
 		binary=$value
 	fi
-
+    
 	writeGPIO ${gpio_enable} 1
 	writeGPIO ${gpio_register} 0
 	setDataHD44780 ${binary}
