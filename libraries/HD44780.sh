@@ -56,7 +56,7 @@ function writeStringHD44780 {
 	IFS=$(echo -en "\n\b")
 
 	for l in $(echo ${string} | tr '[:lower:]' '[:upper:]' | fold -w1); do
-		binary=$(grep "^${l}," mapping.csv | cut -d ',' -f 2)
+		binary=$(grep "^${l}," /usr/share/gpio-tools/mappings/HD44780.csv | cut -d ',' -f 2)
 
 		if [ -z $binary ]; then
 			# default space
